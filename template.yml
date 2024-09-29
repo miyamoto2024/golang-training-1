@@ -1,0 +1,36 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+
+Description: 'sam-golang linebot'
+
+Resources:
+  LineBotFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      FunctionName: sam-golang-linebot
+      PackageType: Zip
+      CodeUri: src/
+      Handler: bootstrap
+      Runtime: provided.al2023
+      Architectures: [arm64]
+      MemorySize: 256
+      Timeout: 15
+      Environment:
+        Variables:
+          LINE_BOT_CHANNEL_SECRET: '{{resolve:secretsmanager:linebot-access-key:SecretString:LINE_BOT_CHANNEL_SECRET}}'
+          LINE_BOT_CHANNEL_TOKEN:  '{{resolve:secretsmanager:linebot-access-key:SecretString:LINE_BOT_CHANNEL_TOKEN}}'
+      FunctionUrlConfig:
+        AuthType: NONE
+        InvokeMode: BUFFERED
+        Cors:
+          AllowOrigins: 
+           - '*'
+          MaxAge: 0
+    Metadata:
+      BuildMethod: go1.x
+      BuildProperties:
+        TrimGoPath: True
+Outputs:
+  LineBotFunctionUrlEndpoint:
+    Description: 'Function URL Endpoint'
+    Value: !GetAtt LineBotFunctionUrl.FunctionUrl
